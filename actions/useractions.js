@@ -12,31 +12,31 @@ export const initiate = async (amount, to_username, paymentform) => {
     const secret = user.razorpaySecret
 
     var instance = new Razorpay({ key_id: user.razorpayId, key_secret: secret })
+    console.log("Using Razorpay credentials:", user.razorpayId, secret);
 
-    // instance.orders.create({
-    //     amount: 5000,
-    //     currency: "INR",
-    //     receipt: "receipt#1",
-    //     notes: {
-    //         key1: "value3",
-    //         key2: "value2"
-    //     }
-    // })
     let options = {
         amount: Number.parseInt(amount),
         currency: "INR",
     }
-    let x = await instance.orders.create(options)
+    console.log("Creating Razorpay order with:", options);
 
-    //create a payment object  
-    await Payment.create({
-        order_id: x.id,
-        amount: amount,
-        to_user: to_username,
-        name: paymentform.name,
-        message: paymentform.message,
-    })
-    return x
+    try{
+        let x = await instance.orders.create(options)
+    
+        //create a payment object  
+        await Payment.create({
+            order_id: x.id,
+            amount: amount,
+            to_user: to_username,
+            name: paymentform.name,
+            message: paymentform.message,
+        })
+        return x
+    }
+    catch (err) {
+        console.error("Razorpay error:", err);
+        throw err;
+    }
 }
 
 
